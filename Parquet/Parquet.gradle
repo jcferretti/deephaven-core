@@ -17,15 +17,15 @@ sourceSets {
 }
 
 dependencies {
-    api project(':ParquetHadoop')
+    api('org.apache.parquet:parquet-hadoop:1.12.0')
+    api('org.apache.hadoop:hadoop-client:3.3.0')
 
     implementation project(':CompilerTools')
 
-    /*
-    compile 'org.apache.parquet:parquet-common:1.10.0'
-    compile 'org.apache.parquet:parquet-encoding:1.10.0'
-    compile 'org.apache.parquet:parquet-column:1.10.0'
-    */
-    testImplementation 'junit:junit:4.12'
+    // These are necessary for parquet compression codec support.
+    runtimeOnly('com.hadoop.gplcompression:hadoop-lzo:0.4.20')  // For LZO codec.
+    runtimeOnly('org.lz4:lz4-java:1.8.0')                       // For LZ4 codec.
+    runtimeOnly('com.github.rdblue:brotli-codec:0.1.1')         // For Brotli codec.
 
+    testImplementation 'junit:junit:4.12'
 }
