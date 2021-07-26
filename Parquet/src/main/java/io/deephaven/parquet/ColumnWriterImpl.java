@@ -1,6 +1,5 @@
 package io.deephaven.parquet;
 
-import io.deephaven.parquet.tempfix.ParquetMetadataConverter;
 import org.apache.parquet.bytes.ByteBufferAllocator;
 import org.apache.parquet.bytes.BytesInput;
 import org.apache.parquet.column.ColumnDescriptor;
@@ -9,6 +8,7 @@ import org.apache.parquet.column.statistics.Statistics;
 import org.apache.parquet.column.values.rle.RunLengthBitPackingHybridEncoder;
 import org.apache.parquet.compression.CompressionCodecFactory;
 import org.apache.parquet.format.*;
+import org.apache.parquet.format.converter.ParquetMetadataConverter;
 import org.apache.parquet.hadoop.metadata.ColumnChunkMetaData;
 import org.apache.parquet.hadoop.metadata.ColumnPath;
 import org.apache.parquet.internal.column.columnindex.OffsetIndex;

@@ -1,6 +1,5 @@
 package io.deephaven.parquet;
 
-import io.deephaven.parquet.tempfix.ParquetMetadataConverter;
 import io.deephaven.parquet.utils.SeekableChannelsProvider;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.parquet.Version;
@@ -8,6 +7,7 @@ import org.apache.parquet.bytes.ByteBufferAllocator;
 import org.apache.parquet.bytes.BytesUtils;
 
 import org.apache.parquet.format.Util;
+import org.apache.parquet.format.converter.ParquetMetadataConverter;
 import org.apache.parquet.hadoop.CodecFactory;
 import org.apache.parquet.hadoop.metadata.*;
 import org.apache.parquet.internal.column.columnindex.OffsetIndex;
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.parquet.format.Util.writeFileMetaData;
-import static org.apache.parquet.format.Util.writePageHeader;
 
 public class ParquetFileWriter {
     private static ParquetMetadataConverter metadataConverter = new ParquetMetadataConverter();
