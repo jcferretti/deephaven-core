@@ -4,6 +4,7 @@ import contextlib
 import os
 import os.path
 from os.path import join as pjoin
+import re
 import shlex
 import shutil
 import sysconfig
