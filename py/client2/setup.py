@@ -52,7 +52,7 @@ class build_ext(_build_ext):
                                          'release').lower()
         _build_ext.initialize_options(self)
 
-    MODULE_NAMES = ['types']
+    MODULE_NAMES = [project_name]
 
     def _run_cmake(self):
         # check if build_type is correctly passed / set
@@ -127,13 +127,6 @@ class build_ext(_build_ext):
 
             build_prefix = self.build_type
 
-            if self.bundle_arrow_cpp or self.bundle_arrow_cpp_headers:
-                print('Bundling includes: ' + pjoin(build_prefix, 'include'))
-                if os.path.exists(pjoin(build_lib, 'pyarrow', 'include')):
-                    shutil.rmtree(pjoin(build_lib, 'pyarrow', 'include'))
-                shutil.move(pjoin(build_prefix, 'include'),
-                            pjoin(build_lib, 'pyarrow'))
-
             # Move the built C-extension to the place expected by the Python
             # build
             self._found_names = []
@@ -141,11 +134,7 @@ class build_ext(_build_ext):
                 built_path = self.get_ext_built(name)
                 if not os.path.exists(built_path):
                     print('Did not find {0}'.format(built_path))
-                    if self._failure_permitted(name):
-                        print('Cython module {0} failure permitted'
-                              .format(name))
-                        continue
-                    raise RuntimeError('pyarrow C-extension failed to build:',
+                    raise RuntimeError('C-extension failed to build:',
                                        os.path.abspath(built_path))
 
                 # The destination path to move the built C extension to
@@ -177,7 +166,7 @@ class build_ext(_build_ext):
         return pjoin(self.build_type, name + ext_suffix)
 
     def _get_cmake_ext_path(self, name):
-        # This is the name of the arrow C-extension
+        # This is the name of the C-extension
         filename = name + ext_suffix
         return pjoin(self._get_build_dir(), filename)
 
@@ -196,7 +185,7 @@ setup(
     name=project_name,
     packages=packages,
     zip_safe=False,
-    package_data={'pyarrow': ['*.pxd', '*.pyx', 'includes/*.pxd']},
+    package_data={project_name: ['*.pxd', '*.pyx', 'includes/*.pxd']},
     include_package_data=True,
     distclass=BinaryDistribution,
     # Dummy extension to trigger build_ext

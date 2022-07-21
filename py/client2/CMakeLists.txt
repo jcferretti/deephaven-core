@@ -65,13 +65,14 @@ find_package(Python3Alt REQUIRED)
 include(UseCython)
 
 include_directories(SYSTEM ${NUMPY_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} src)
+include_directories(SYSTEM ../../cpp-client/deephaven/client/include/public)
 
 #find_package(deephaven REQUIRED)
 add_subdirectory(../../cpp-client/deephaven deephaven_dir)
 
 # Always bundle includes
-get_filename_component(DEEPHAVEN_INCLUDE_REALPATH "../../cpp-client/deephaven/client/include" REALPATH)
-file(COPY ${DEEPHAVEN_INCLUDE_REALPATH} DESTINATION ${BUILD_OUTPUT_ROOT_DIRECTORY}/include)
+#get_filename_component(DEEPHAVEN_INCLUDE_REALPATH "../../cpp-client/deephaven/client/include" REALPATH)
+#file(COPY ${DEEPHAVEN_INCLUDE_REALPATH} DESTINATION ${BUILD_OUTPUT_ROOT_DIRECTORY}/include)
 
 if(UNIX)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
