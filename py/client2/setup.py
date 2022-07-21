@@ -13,6 +13,7 @@ from setuptools import setup, Extension, Distribution
 
 from Cython.Distutils import build_ext as _build_ext
 import Cython
+from Cython.Build import cythonize
 
 project_name='pydeephaven2'
 
@@ -200,6 +201,11 @@ setup(
     distclass=BinaryDistribution,
     # Dummy extension to trigger build_ext
     ext_modules=[Extension('__dummy__', sources=[])],
+#    ext_modules=cythonize(Extension(
+#        "types.pyx",
+#        sources=["../../cpp-client/deephaven/client/src/types.cc"],
+#        language="c++"
+#    )),
     cmdclass={
         'build_ext': build_ext
     },
