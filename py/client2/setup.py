@@ -47,6 +47,7 @@ def strtobool(val):
         raise ValueError("invalid truth value %r" % (val,))
 
 class build_ext(_build_ext):
+    _found_names = ()
     def build_extensions(self):
         numpy_incl = pkg_resources.resource_filename('numpy', 'core/include')
 
@@ -71,7 +72,7 @@ class build_ext(_build_ext):
             os.environ.get('BUNDLE_CYTHON_CPP', '0'))
         _build_ext.initialize_options(self)
 
-    MODULE_NAMES = [project_name]
+    MODULE_NAMES = [ project_name ]
 
     def _run_cmake(self):
         # check if build_type is correctly passed / set
@@ -173,6 +174,15 @@ class build_ext(_build_ext):
                                 pjoin(os.path.dirname(ext_path),
                                       name + '_api.h'))
 
+    def get_names(self):
+        return self._found_names
+
+    def get_outputs(self):
+        # Just the C extensions
+        # regular_exts = _build_ext.get_outputs(self)
+        return [self._get_cmake_ext_path(name)
+                for name in self.get_names()]
+
     def _get_build_dir(self):
         # Get the package directory from build_py
         build_py = self.get_finalized_command('build_py')
@@ -213,9 +223,9 @@ setup(
     # Dummy extension to trigger build_ext
     ext_modules=[Extension('__dummy__', sources=[])],
 #    ext_modules=cythonize(Extension(
-#        "types.pyx",
+#        project_name + ".pyx",
 #        sources=["../../cpp-client/deephaven/client/src/types.cc"],
-#        include_path=["../../cpp-client/deephaven/client/include/public" ],
+#        include_dirs=["../../cpp-client/deephaven/client/include/public" ],
 #        language="c++"
 #    )),
     cmdclass={
