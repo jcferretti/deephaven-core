@@ -204,6 +204,7 @@ setup(
 #    ext_modules=cythonize(Extension(
 #        "types.pyx",
 #        sources=["../../cpp-client/deephaven/client/src/types.cc"],
+#        include_path=["../../cpp-client/deephaven/client/include/public" ],
 #        language="c++"
 #    )),
     cmdclass={
