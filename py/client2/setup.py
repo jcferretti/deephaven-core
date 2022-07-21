@@ -9,6 +9,7 @@ import shlex
 import shutil
 import sysconfig
 
+import pkg_resources
 from setuptools import setup, Extension, Distribution
 
 from Cython.Distutils import build_ext as _build_ext
@@ -28,6 +29,22 @@ def changed_dir(dirname):
     finally:
         os.chdir(oldcwd)
 
+
+def strtobool(val):
+    """Convert a string representation of truth to true (1) or false (0).
+
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+    'val' is anything else.
+    """
+    # Copied from distutils
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return 0
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
 
 class build_ext(_build_ext):
     def build_extensions(self):
@@ -50,6 +67,8 @@ class build_ext(_build_ext):
         self.extra_cmake_args = os.environ.get('CMAKE_OPTIONS', '')
         self.build_type = os.environ.get('BUILD_TYPE',
                                          'release').lower()
+        self.bundle_cython_cpp = strtobool(
+            os.environ.get('BUNDLE_CYTHON_CPP', '0'))
         _build_ext.initialize_options(self)
 
     MODULE_NAMES = [project_name]
@@ -125,8 +144,6 @@ class build_ext(_build_ext):
             except OSError:
                 pass
 
-            build_prefix = self.build_type
-
             # Move the built C-extension to the place expected by the Python
             # build
             self._found_names = []
@@ -156,6 +173,11 @@ class build_ext(_build_ext):
                                 pjoin(os.path.dirname(ext_path),
                                       name + '_api.h'))
 
+    def _get_build_dir(self):
+        # Get the package directory from build_py
+        build_py = self.get_finalized_command('build_py')
+        return build_py.get_package_dir(project_name)
+
     def get_ext_generated_cpp_source(self, name):
         return pjoin(name + ".cpp")
 
@@ -163,7 +185,7 @@ class build_ext(_build_ext):
         return pjoin(name + "_api.h")
 
     def get_ext_built(self, name):
-        return pjoin(self.build_type, name + ext_suffix)
+        return name + ext_suffix
 
     def _get_cmake_ext_path(self, name):
         # This is the name of the C-extension

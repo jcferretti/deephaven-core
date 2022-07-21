@@ -80,7 +80,7 @@ endif()
 
 set(CYTHON_EXTENSIONS
   # Add here to list as more pxd wrapping is done.
-  types)
+  pydeephaven2)
 
 foreach(module ${CYTHON_EXTENSIONS})
   string(REPLACE "." ";" directories ${module})
