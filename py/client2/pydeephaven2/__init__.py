@@ -1,15 +1,15 @@
-import gc as _gc
-import os as _os
+#import gc as _gc
+#import os as _os
 
 # ARROW-8684: Disable GC while initializing Cython extension module,
 # to workaround Cython bug in https://github.com/cython/cython/issues/3603
-_gc_enabled = _gc.isenabled()
-_gc.disable()
-import pydeephaven2.lib as _lib
-if _gc_enabled:
-    _gc.enable()
+#_gc_enabled = _gc.isenabled()
+#_gc.disable()
+#import pydeephaven2.lib as _lib
+#if _gc_enabled:
+#    _gc.enable()
 
-from pydeephaven2.lib import (DhDateTime)
+#from pydeephaven2.lib import (DateTime)
 
 def get_include():
     """
@@ -21,7 +21,7 @@ def get_include():
 def get_libraries():
     """
     Return list of library names to include in the `libraries` argument for C
-    or Cython extensions using pyarrow
+    or Cython extensions using pydeephaven2
     """
     return ['pydeephaven2']
 
