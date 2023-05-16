@@ -193,6 +193,29 @@ public interface TableOperationsDefaults<TOPS extends TableOperations<TOPS, TABL
     }
 
     // -----------------------------------------------------------------------------------------------------------------
+
+    @Override
+    default TOPS rangeJoin(
+            final TABLE rightTable,
+            final Collection<String> columnsToMatch,
+            final Collection<? extends Aggregation> aggregations) {
+        if (columnsToMatch.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No match expressions found; must include at least a range match expression");
+        }
+        final Iterator<String> matchExpressions = columnsToMatch.iterator();
+        final int numExactMatches = columnsToMatch.size() - 1;
+        final Collection<JoinMatch> exactMatches = numExactMatches == 0
+                ? Collections.emptyList()
+                : new ArrayList<>(numExactMatches);
+        for (int emi = 0; emi < numExactMatches; ++emi) {
+            exactMatches.add(JoinMatch.parse(matchExpressions.next()));
+        }
+        final RangeJoinMatch rangeMatch = RangeJoinMatch.parse(matchExpressions.next());
+        return rangeJoin(rightTable, exactMatches, rangeMatch, aggregations);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
     // Aggregation Operations
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -310,6 +333,12 @@ public interface TableOperationsDefaults<TOPS extends TableOperations<TOPS, TABL
     }
 
     @Override
+    default TOPS updateBy(final UpdateByControl control, final UpdateByOperation operation) {
+        return updateBy(control, Collections.singletonList(operation),
+                Collections.emptyList());
+    }
+
+    @Override
     default TOPS updateBy(final Collection<? extends UpdateByOperation> operations) {
         return updateBy(UpdateByControl.defaultInstance(), operations, Collections.emptyList());
     }
@@ -322,6 +351,12 @@ public interface TableOperationsDefaults<TOPS extends TableOperations<TOPS, TABL
     @Override
     default TOPS updateBy(final UpdateByOperation operation, final String... byColumns) {
         return updateBy(UpdateByControl.defaultInstance(), Collections.singletonList(operation),
+                ColumnName.from(byColumns));
+    }
+
+    @Override
+    default TOPS updateBy(final UpdateByControl control, final UpdateByOperation operation, final String... byColumns) {
+        return updateBy(control, Collections.singletonList(operation),
                 ColumnName.from(byColumns));
     }
 

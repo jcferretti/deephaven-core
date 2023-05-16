@@ -84,7 +84,7 @@ public class ReplicateUpdateBy {
                 fixupByte(f);
             }
 
-            if (f.contains("Long") && f.contains("MinMax")) {
+            if (f.contains("Long")) {
                 augmentLongWithReinterps(f);
             }
         }
@@ -93,13 +93,18 @@ public class ReplicateUpdateBy {
                 "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/prod/ShortCumProdOperator.java",
                 "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/prod/FloatCumProdOperator.java");
 
-        replicateNumericOperator(
-                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/ema/ShortEMAOperator.java",
-                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/ema/FloatEMAOperator.java");
-
-        replicateNumericOperator(
-                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/rollingsum/ShortRollingSumOperator.java",
-                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/rollingsum/FloatRollingSumOperator.java");
+        files = ReplicatePrimitiveCode.charToAllButBooleanAndFloats(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/em/CharEMOperator.java");
+        for (final String f : files) {
+            if (f.contains("Integer")) {
+                fixupInteger(f);
+            }
+            if (f.contains("Byte")) {
+                fixupByte(f);
+            }
+        }
+        ReplicatePrimitiveCode.floatToAllFloatingPoints(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/em/FloatEMOperator.java");
 
         files = ReplicatePrimitiveCode.charToIntegers(
                 "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/rollingavg/CharRollingAvgOperator.java",
@@ -132,6 +137,62 @@ public class ReplicateUpdateBy {
                 fixupInteger(f);
             }
         }
+
+        files = ReplicatePrimitiveCode.charToAllButBoolean(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/delta/CharDeltaOperator.java",
+                exemptions);
+        for (final String f : files) {
+            if (f.contains("Int")) {
+                fixupInteger(f);
+            }
+        }
+
+        files = ReplicatePrimitiveCode.charToAllButBoolean(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/rollingcount/CharRollingCountOperator.java");
+        for (final String f : files) {
+            if (f.contains("Integer")) {
+                fixupInteger(f);
+            }
+
+            if (f.contains("Byte")) {
+                fixupByte(f);
+            }
+        }
+
+        files = ReplicatePrimitiveCode.charToAllButBoolean(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/rollingstd/CharRollingStdOperator.java");
+        for (final String f : files) {
+            if (f.contains("Integer")) {
+                fixupInteger(f);
+            }
+            if (f.contains("Byte")) {
+                fixupByte(f);
+            }
+        }
+
+        files = ReplicatePrimitiveCode.charToAllButBoolean(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/rollingwavg/CharRollingWAvgOperator.java");
+        for (final String f : files) {
+            if (f.contains("Integer")) {
+                fixupInteger(f);
+            }
+        }
+
+        files = ReplicatePrimitiveCode.charToIntegers(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/emstd/CharEmStdOperator.java",
+                exemptions);
+        for (final String f : files) {
+            if (f.contains("Int")) {
+                fixupInteger(f);
+            }
+
+            if (f.contains("Byte")) {
+                fixupByte(f);
+            }
+        }
+        ReplicatePrimitiveCode.floatToAllFloatingPoints(
+                "engine/table/src/main/java/io/deephaven/engine/table/impl/updateby/emstd/FloatEmStdOperator.java");
+
     }
 
     private static void replicateNumericOperator(@NotNull final String shortClass, @NotNull final String floatClass)
