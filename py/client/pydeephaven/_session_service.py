@@ -4,6 +4,7 @@
 
 import grpc
 
+from typing import Optional
 from pydeephaven.dherror import DHError
 from deephaven_core.proto import session_pb2_grpc, session_pb2, ticket_pb2
 from pydeephaven.ticket import Ticket, ExportTicket
@@ -28,14 +29,19 @@ class SessionService:
         self._grpc_session_stub = session_pb2_grpc.SessionServiceStub(grpc_channel)
         return grpc_channel
 
-    def close(self):
-        """Closes the gRPC connection."""
+    def close(self, timeout: Optional[float] = None):
+        """Closes the session.
+           Args:
+               timeout (float): A timeout in seconds to use on the server call. Defaults to None which implies no timeout
+        """
         try:
             self.session.wrap_rpc(
                 self._grpc_session_stub.CloseSession,
                 session_pb2.HandshakeRequest(
                     auth_protocol=0,
-                    payload=self.session._auth_header_value))
+                    payload=self.session._auth_header_value),
+                timeout = timeout
+            )
         except Exception as e:
             raise DHError("failed to close the session.") from e
 
@@ -48,13 +54,13 @@ class SessionService:
         except Exception as e:
             raise DHError("failed to release a ticket.") from e
 
-    def publish(self, source_ticket: Ticket, result_ticket: Ticket) -> None:
+    def publish(self, source_ticket: Ticket, result_ticket: Ticket, timeout: Optional[float] = None) -> None:
         """Makes a copy from the source ticket and publishes it to the result ticket.
 
         Args:
             source_ticket (Ticket): The source ticket to publish from.
             result_ticket (Ticket): The result ticket to publish to.
-
+            timeout (float): A timeout in seconds to use on the server call. Defaults to None which implies no timeout
         Raises:
             DHError: If the operation fails.
         """
@@ -63,15 +69,18 @@ class SessionService:
                 self._grpc_session_stub.PublishFromTicket,
                 session_pb2.PublishRequest(
                     source_id=source_ticket.pb_ticket,
-                    result_id=result_ticket.pb_ticket))
+                    result_id=result_ticket.pb_ticket),
+                timeout = timeout
+            )
         except Exception as e:
             raise DHError("failed to publish a ticket.") from e
 
-    def fetch(self, ticket: Ticket) -> ExportTicket:
+    def fetch(self, ticket: Ticket, timeout: Optional[float] = None) -> ExportTicket:
         """Fetches a typed ticket from a ticket.
 
         Args:
             ticket: The ticket to fetch from.
+            timeout (float): A timeout in seconds to use on the server call. Defaults to None which implies no timeout
 
         Returns:
             The typed ticket.
@@ -80,7 +89,9 @@ class SessionService:
             result_id = self.session.make_export_ticket()
             self.session.wrap_rpc(
                 self._grpc_session_stub.ExportFromTicket,
-                session_pb2.ExportRequest(source_id=ticket.pb_ticket, result_id=result_id.pb_ticket))
+                session_pb2.ExportRequest(source_id=ticket.pb_ticket, result_id=result_id.pb_ticket),
+                timeout = timeout
+            )
             return result_id
         except Exception as e:
             raise DHError("failed to fetch a ticket.") from e

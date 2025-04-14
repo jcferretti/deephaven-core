@@ -387,7 +387,7 @@ class Session:
             # use in subsequent RPCs; the token will be included in the updated
             # value for self._auth_header_value that will happen through a call
             # to update_metadata.
-            config_dict = self.config_service.get_configuration_constants()
+            config_dict = self.config_service.get_configuration_constants(wait_for_ready=False)
             session_duration = config_dict.get("http.session.durationMs")
             if not session_duration:
                 raise DHError("server configuration is missing http.session.durationMs")
@@ -447,7 +447,7 @@ class Session:
     def _refresh_token(self) -> bool:
         _trace('_refresh_token')
         try:
-            self.config_service.get_configuration_constants()
+            self.config_service.get_configuration_constants(wait_for_ready = False)
             return True
         except Exception as ex:
             logger.warning(f'{self._logpfx} Caught exception while refreshing auth token: {ex}.')
@@ -494,18 +494,19 @@ class Session:
         self.session_service.release(ticket)
 
     # convenience/factory methods
-    def run_script(self, script: str, systemic: Optional[bool] = None) -> None:
+    def run_script(self, script: str, systemic: Optional[bool] = None, timeout: Optional[float] = None) -> None:
         """Runs the supplied Python script on the server.
 
         Args:
             script (str): the Python script code
             systemic (bool): Whether to treat the code as systemically important. Defaults to None which uses the
                     default system behavior
+            timeout (float): A timeout in seconds for the server operation, or None for no timeout. Defaults to None.
 
         Raises:
             DHError
         """
-        response = self.console_service.run_script(script, systemic)
+        response = self.console_service.run_script(script, systemic, timeout)
         if response.error_message != '':
             raise DHError("could not run script: " + response.error_message)
 

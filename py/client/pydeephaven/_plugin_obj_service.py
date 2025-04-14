@@ -25,7 +25,9 @@ class PluginObjService:
         try:
             resp = self.session.wrap_bidi_rpc(
                 self._grpc_app_stub.MessageStream,
-                req_stream)
+                req_stream,
+                wait_for_ready = True
+            )
             return resp
         except Exception as e:
             raise DHError("failed to establish bidirectional stream with the server.") from e
