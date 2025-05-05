@@ -23,7 +23,9 @@ class TableService:
         try:
             response = self.session.wrap_bidi_rpc(
                 self._grpc_table_stub.Batch,
-                table_pb2.BatchTableRequest(ops=batch_ops))
+                table_pb2.BatchTableRequest(ops=batch_ops),
+                wait_for_ready = True
+            )
 
             exported_tables = []
             for exported in response:
@@ -38,7 +40,12 @@ class TableService:
         except Exception as e:
             raise DHError("failed to finish the table batch operation.") from e
 
-    def grpc_table_op(self, table: Optional[Table], op: TableOp, table_class: type = Table) -> Union[Table, InputTable]:
+    def grpc_table_op(
+            self, table: Optional[Table],
+            op: TableOp,
+            table_class: type = Table,
+            timeout: Optional[float] = None
+    ) -> Union[Table, InputTable]:
         """Makes a single gRPC Table operation call and returns a new Table."""
         try:
             export_ticket = self.session.make_export_ticket()
@@ -51,7 +58,10 @@ class TableService:
                 stub_func,
                 op.make_grpc_request(
                     result_id=export_ticket.pb_ticket,
-                    source_id=table_reference))
+                    source_id=table_reference),
+                timeout = timeout,
+                wait_for_ready = True
+            )
             if response.success:
                 return table_class(self.session, ticket=ExportTicket(response.result_id.ticket.ticket),
                                    schema_header=response.schema_header,
@@ -62,11 +72,18 @@ class TableService:
         except Exception as e:
             raise DHError(f"failed to finish {op.__class__.__name__} operation") from e
 
-    def fetch_etcr(self, ticket) -> Table:
-        """Given a ticket, constructs a table around it, by fetching metadata from the server."""
+    def fetch_etcr(self, ticket: Ticket, timeout: Optional[float] = None) -> Table:
+        """Given a ticket, constructs a table around it, by fetching metadata from the server.
+           Args:
+               ticket (Ticket) the ticket
+               timeout (float): A timeout in seconds to use on the server call. Defaults to None which implies no timeout
+        """
         response = self.session.wrap_rpc(
             self._grpc_table_stub.GetExportedTableCreationResponse,
-            ticket)
+            ticket,
+            timeout = timeout,
+            wait_for_ready = True
+        )
 
         ticket = _ticket_from_proto(response.result_id.ticket)
         if response.success:
