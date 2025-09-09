@@ -13,6 +13,8 @@ from pydeephaven import Session
 from pydeephaven.ticket import SharedTicket, ScopeTicket
 from tests.testbase import BaseTestCase
 
+import grpc
+from grpc import StatusCode
 
 class SessionTestCase(BaseTestCase):
 
@@ -48,6 +50,37 @@ class SessionTestCase(BaseTestCase):
         t = session.empty_table(1000)
         self.assertEqual(t.size, 1000)
         session.close()
+
+    def test_run_script_with_timeout(self):
+        with Session() as session:
+            script = ("""
+from deephaven import empty_table
+import time
+time.sleep(2)
+ttout = empty_table(10)
+""")
+            got_expected_error = False
+            try:
+                session.run_script(script, timeout=0.000001)
+            except DHError as e:
+                e = e.__cause__
+                got_expected_error = (
+                    e is not None and (
+                        e.code() == StatusCode.DEADLINE_EXCEEDED or
+                        e.code() == StatusCode.CANCELLED))
+                if not got_expected_error:
+                    raise e
+            self.assertTrue(got_expected_error)
+            sleep(2)
+            got_expected_error = False
+            try:
+                t = session.open_table('ttout')
+                self.assertEqual(t.size, 10)
+            except DHError as e:
+                got_expected_error = str(ex).startswith('no table by the name')
+                if not got_expected_error:
+                    raise e
+            self.assertTrue(got_expected_error)
 
     def test_time_table(self):
         with Session() as session:
